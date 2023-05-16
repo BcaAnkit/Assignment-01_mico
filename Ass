@@ -1,0 +1,46 @@
+import re
+
+# Function to parse the CREATE TABLE statement and store metadata
+def parse_create_table(sql):
+    match = re.match(r"CREATE TABLE (\w+) \((.+)\)", sql)
+    if match:
+        table_name = match.group(1)
+        columns = match.group(2).split(", ")
+        metadata = f"{table_name}_metadata.txt"
+
+        with open(metadata, "w") as file:
+            file.write("\n".join(columns))
+        
+        print(f"Table '{table_name}' created successfully.")
+    else:
+        print("Invalid CREATE TABLE statement.")
+
+# Function to parse the INSERT statement and insert data into the table file
+def parse_insert(sql):
+    match = re.match(r"INSERT INTO (\w+) VALUES \((.+)\)", sql)
+    if match:
+        table_name = match.group(1)
+        values = match.group(2).split(", ")
+        table_file = f"{table_name}.txt"
+        metadata = f"{table_name}_metadata.txt"
+
+        with open(metadata, "r") as file:
+            columns = file.read().splitlines()
+
+        if len(values) == len(columns):
+            row = "\t".join(values)
+            with open(table_file, "a") as file:
+                file.write(row + "\n")
+            
+            print("Data inserted successfully.")
+        else:
+            print("Number of values does not match the number of columns.")
+    else:
+        print("Invalid INSERT statement.")
+
+# Example usage
+create_sql = "CREATE TABLE my_table (col1 INTEGER, col2 STRING, col3 INTEGER)"
+insert_sql = "INSERT INTO my_table VALUES (1, 'Hello', 42)"
+
+parse_create_table(create_sql)
+parse_insert(insert_sql)
